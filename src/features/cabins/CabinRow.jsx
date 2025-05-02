@@ -6,18 +6,9 @@ import useDeleteCabin from "./useDeleteCabin";
 import { HiSquare2Stack, HiTrash } from "react-icons/hi2";
 import { HiPencil } from "react-icons/hi";
 import useCreateCabin from "./useCreateCabin";
-
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-  column-gap: 2.4rem;
-  align-items: center;
-  padding: 1.4rem 2.4rem;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-`;
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
+import Table from "../../ui/Table";
 
 const Img = styled.img`
   display: block;
@@ -48,6 +39,7 @@ const Discount = styled.div`
 
 export default function CabinRow({ cabin }) {
   const [showForm, setShowForm] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
   const {
     id: cabinId,
@@ -75,7 +67,7 @@ export default function CabinRow({ cabin }) {
 
   return (
     <>
-      <TableRow>
+      <Table.Row>
         <Img src={image} />
         <Cabin>{name}</Cabin>
         <div>Fits up to {maxCapacity} guests</div>
@@ -92,13 +84,31 @@ export default function CabinRow({ cabin }) {
           <button onClick={() => setShowForm((val) => !val)}>
             <HiPencil />
           </button>
-          <button onClick={() => deleteCabin(cabinId)} disabled={isDeleting}>
+          <button
+            onClick={() => setShowDeleteAlert((val) => !val)}
+            disabled={isDeleting}
+          >
             <HiTrash />
           </button>
         </div>
-      </TableRow>
+      </Table.Row>
       {showForm && (
-        <CreateCabinForm cabinToEdit={cabin} setShowForm={setShowForm} />
+        <Modal onClose={() => setShowForm(false)}>
+          <CreateCabinForm
+            onCloseModal={() => setShowForm(false)}
+            cabinToEdit={cabin}
+          />
+        </Modal>
+      )}
+      {showDeleteAlert && (
+        <Modal onClose={() => setShowDeleteAlert(false)}>
+          <ConfirmDelete
+            resourceName="Cabins"
+            disabled={isDeleting}
+            onConfirm={() => deleteCabin(cabinId)}
+            onClose={() => setShowDeleteAlert((val) => !val)}
+          />
+        </Modal>
       )}
     </>
   );
